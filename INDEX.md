@@ -16,6 +16,7 @@
 |------|------|---------|
 | 通用 AI 協作規則（@include 繼承） | `CLAUDE.md` | 所有客戶 |
 | AI 行為規則 / 資料傳遞契約 | `governance/collaboration/` | 所有客戶 |
+| context.md 維護規範（何時刪除 / 壓縮 / 保留）| `governance/collaboration/(AI_Read) context 維護規範.md` | 所有有 context.md 的系統 |
 | 角色 & 領域骨架模板 | `governance/roles/` | 需要多角色系統的客戶 |
 | 通用 Prompt 模板（學習框架、壓縮格式等）| `governance/prompts/` | 所有客戶 |
 | 知識管理架構概念（三層知識庫結構）| `governance/knowledge/` | **有 Wiki 子系統的客戶才需讀** |
