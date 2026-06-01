@@ -2,10 +2,10 @@
 name: image-prompt
 description: 萬用圖片提示詞架構師。用 JSON 結構化思考畫面，再翻譯成目標 AI 平台的最佳格式（Midjourney / DALL-E 3 / Stable Diffusion / Flux / Firefly / Ideogram 等）。
 version: v1.0
-source_skill: gpt-image-2
 source_repo: https://github.com/ConardLi/garden-skills
 source_file: skills/gpt-image-2/SKILL.md
-derived_from: gpt-image-2 Skill 的 JSON 提示詞方法論與 18 大圖像分類，提煉為平台無關的萬用版本
+installed_date: 2026-06-01
+derived_from: gpt-image-2 Skill 的 JSON 提示詞方法論與 18 大圖像分類，提煉為平台無關的萬用版本，擴充六大平台翻譯規則
 ---
 
 # Image Prompt — 萬用圖片提示詞架構

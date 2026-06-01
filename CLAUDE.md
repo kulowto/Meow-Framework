@@ -48,6 +48,9 @@
 
 安裝完成後，立即將工具資訊更新至 CLAUDE.md 的已安裝工具表格。
 
+**Skill 安裝 / 自建 / 更新時，必須同步完成來源追蹤記錄（強制）：**
+完整規範：`governance/collaboration/(AI_Read) (Global Prompt) Skill 來源追蹤規範.md`
+
 ---
 
 ## 不確定問題的處理流程

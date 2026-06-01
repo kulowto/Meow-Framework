@@ -3,9 +3,9 @@ name: wiki-query
 description: 使用分層索引從知識庫精準檢索內容，保護 context 不被大量文件撐爆。整合品質機制（reviewed 狀態）與特殊格式處理（PDF / Excel）。
 version: v1.0
 適用系統: Meow-Wiki 及遵循相同架構的知識庫
-source_skill: kb-retriever
 source_repo: https://github.com/ConardLi/garden-skills
 source_file: skills/kb-retriever/SKILL.md
+installed_date: 2026-06-01
 derived_from: kb-retriever 的分層索引與迭代檢索機制，擴充 reviewed 品質機制、5 輪上限後使用者決策節點、PDF/Excel 特殊格式處理
 ---
 
