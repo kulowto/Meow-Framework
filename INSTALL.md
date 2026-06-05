@@ -204,7 +204,7 @@ Claude Code 按 `Ctrl+G` 可開啟外部編輯器撰寫長段 prompt。
 #### Mac（加入 `~/.zshrc`）
 
 ```bash
-alias cc='cd ~/Meow-Env/Meow-agent && claude --no-flash'
+alias cc='cd ~/Meow-Env/Meow-agent && CLAUDE_CODE_NO_FLICKER=1 claude'
 ```
 
 #### Windows（加入 PowerShell Profile）
@@ -214,11 +214,65 @@ alias cc='cd ~/Meow-Env/Meow-agent && claude --no-flash'
 ```powershell
 function cc {
     Set-Location D:\Meow-Env\Meow-agent
-    claude --no-flash
+    claude
 }
 ```
 
 設定完成後重新載入 Shell，輸入 `cc` 即可啟動 Claude Code 並進入 Meow-agent 工作目錄。
+
+---
+
+### 5.5 【選配】設定 cc 上下文快速啟動旗標
+
+> **誰需要這個？**  
+> 有在使用各子系統 `context.md` 做跨對話進度追蹤的使用者。  
+> 不使用 context.md 流程者可跳過，直接進入第六章。
+
+啟用後，`cc` 可帶旗標直接讀取指定子系統的 `context.md`，Claude 啟動後會自動告知上次進度。
+
+| 指令 | 行為 |
+|------|------|
+| `cc` | 切到 Meow-Agent，直接啟動，不讀任何文件 |
+| `cc -ma` | 讀 MA `context.md`，告知上次進度，聚焦 Meow-Agent |
+| `cc -mw` | 讀 MW `context.md`，告知上次進度，聚焦 Meow-Wiki |
+| `cc -mt` | 讀 MT `context.md`，告知上次進度，聚焦 Meow-Tools |
+| `cc -md` | 讀 MD `context.md`，告知上次進度，聚焦 Meow-Dev |
+
+#### 【AI 執行】Mac — 將 `~/.zshrc` 內的 cc 改為 function
+
+將原本的 `alias cc=...` 替換為以下 function（兩者不可並存）：
+
+```bash
+function cc() {
+  cd ~/Meow-Env/Meow-agent
+  case "$1" in
+    -ma) CLAUDE_CODE_NO_FLICKER=1 claude "請讀取 context.md 告知上次進度，接下來聚焦 Meow-Agent 任務。" ;;
+    -mw) CLAUDE_CODE_NO_FLICKER=1 claude "請讀取 ~/Meow-Env/Meow-Wiki/context.md 告知上次進度，接下來聚焦 Meow-Wiki 任務。" ;;
+    -mt) CLAUDE_CODE_NO_FLICKER=1 claude "請讀取 ~/Meow-Env/Meow-tools/context.md 告知上次進度，接下來聚焦 Meow-Tools 任務。" ;;
+    -md) CLAUDE_CODE_NO_FLICKER=1 claude "請讀取 ~/Meow-Env/Meow-dev/context.md 告知上次進度，接下來聚焦 Meow-Dev 任務。" ;;
+    *)   CLAUDE_CODE_NO_FLICKER=1 claude ;;
+  esac
+}
+```
+
+#### 【AI 執行】Windows — 將 PowerShell Profile 內的 cc 改為以下版本
+
+```powershell
+function cc {
+    param([string]$flag = "")
+    Set-Location D:\Meow-Env\Meow-agent
+    switch ($flag) {
+        "-ma" { claude "請讀取 context.md 告知上次進度，接下來聚焦 Meow-Agent 任務。" }
+        "-mw" { claude "請讀取 D:\Meow-Env\Meow-Wiki\context.md 告知上次進度，接下來聚焦 Meow-Wiki 任務。" }
+        "-mt" { claude "請讀取 D:\Meow-Env\Meow-tools\context.md 告知上次進度，接下來聚焦 Meow-Tools 任務。" }
+        "-md" { claude "請讀取 D:\Meow-Env\Meow-dev\context.md 告知上次進度，接下來聚焦 Meow-Dev 任務。" }
+        default { claude }
+    }
+}
+```
+
+設定完成後重新載入 Shell，旗標即生效。`context.md` 的格式與維護規範見：  
+`Meow-Framework/governance/collaboration/(AI_Read) context 維護規範.md`
 
 ---
 
