@@ -192,14 +192,17 @@ alias cc='cd ~/Meow-Env/Meow-agent && CLAUDE_CODE_NO_FLICKER=1 claude'
 
 #### Windows（加入 PowerShell Profile）
 
-查看 Profile 路徑：`echo $PROFILE`，加入以下內容：
+查看 Profile 路徑：執行 `$PROFILE` 取得路徑，加入以下內容：
 
 ```powershell
 function cc {
-    Set-Location D:\Meow-Env\Meow-agent
-    claude
+    Set-Location 'D:\Meow-Env\Meow-agent'
+    $env:CLAUDE_CODE_NO_FLICKER = '1'
+    claude @args
 }
 ```
+
+> 若需要上下文旗標（`cc -ma` 等），請使用 5.5 的完整版本取代此段，兩者不可並存。
 
 設定完成後重新載入 Shell，輸入 `cc` 即可啟動 Claude Code 並進入 Meow-agent 工作目錄。
 
@@ -238,24 +241,85 @@ function cc() {
 }
 ```
 
-#### 【AI 執行】Windows — 將 PowerShell Profile 內的 cc 改為以下版本
+#### 【AI 執行】Windows — 將 PowerShell Profile 內的 cc 改為以下完整版本
+
+> 已在 Windows 實測驗證（2026-06-05）。  
+> 此版本使用 `$args[0]` 接收 positional 參數（非 `param`），為 PowerShell 的正確寫法。  
+> 每個旗標均會先確認 `context.md` 是否存在，依結果給出不同提示。
 
 ```powershell
 function cc {
-    param([string]$flag = "")
-    Set-Location D:\Meow-Env\Meow-agent
-    switch ($flag) {
-        "-ma" { claude "請讀取 context.md 告知上次進度，接下來聚焦 Meow-Agent 任務。" }
-        "-mw" { claude "請讀取 D:\Meow-Env\Meow-Wiki\context.md 告知上次進度，接下來聚焦 Meow-Wiki 任務。" }
-        "-mt" { claude "請讀取 D:\Meow-Env\Meow-tools\context.md 告知上次進度，接下來聚焦 Meow-Tools 任務。" }
-        "-md" { claude "請讀取 D:\Meow-Env\Meow-dev\context.md 告知上次進度，接下來聚焦 Meow-Dev 任務。" }
-        default { claude }
+    Set-Location 'D:\Meow-Env\Meow-agent'
+    $env:CLAUDE_CODE_NO_FLICKER = '1'
+    $mode = if ($args.Count -gt 0) { $args[0] } else { '' }
+    switch ($mode) {
+        '-ma' {
+            $ctx = 'D:\Meow-Env\Meow-agent\context.md'
+            if (Test-Path $ctx) {
+                claude "請閱讀 $ctx，摘要告訴我上次做到哪、待續事項，然後等待指示。本次聚焦 Meow-Agent（MA）。"
+            } else {
+                claude "目前沒有 MA 工作進度記錄，本次聚焦 Meow-Agent，等待指示。"
+            }
+        }
+        '-mw' {
+            $ctx = 'D:\Meow-Env\Meow-wiki\context.md'
+            if (Test-Path $ctx) {
+                claude "請閱讀 $ctx，摘要告訴我上次做到哪、待續事項，然後等待指示。本次聚焦 Meow-Wiki（MW）。"
+            } else {
+                claude "目前沒有 MW 工作進度記錄，本次聚焦 Meow-Wiki，等待指示。"
+            }
+        }
+        '-mt' {
+            $ctx = 'D:\Meow-Env\Meow-tools\context.md'
+            if (Test-Path $ctx) {
+                claude "請閱讀 $ctx，摘要告訴我上次做到哪、待續事項，然後等待指示。本次聚焦 Meow-Tools（MT）。"
+            } else {
+                claude "目前沒有 MT 工作進度記錄，本次聚焦 Meow-Tools，等待指示。"
+            }
+        }
+        '-md' {
+            $ctx = 'D:\Meow-Env\Meow-Dev\context.md'
+            if (Test-Path $ctx) {
+                claude "請閱讀 $ctx，摘要告訴我上次做到哪、待續事項，然後等待指示。本次聚焦 Meow-Dev（MD）。"
+            } else {
+                claude "目前沒有 MD 工作進度記錄，本次聚焦 Meow-Dev，等待指示。"
+            }
+        }
+        default {
+            claude @args
+        }
     }
 }
 ```
 
 設定完成後重新載入 Shell，旗標即生效。`context.md` 的格式與維護規範見：  
 `Meow-Framework/governance/collaboration/(AI_Read) context 維護規範.md`
+
+---
+
+### 5.6 【選配】設定 cs 指令（手動壓縮上下文）
+
+`cs` 是手動觸發的上下文保存指令，用於將本次對話的關鍵進度寫入 `context.md`。  
+對應 CLAUDE.md 中 `cs` 的行為定義。
+
+#### 【AI 執行】Mac — 加入 `~/.zshrc`
+
+```bash
+function cs() {
+  cd ~/Meow-Env/Meow-agent
+  CLAUDE_CODE_NO_FLICKER=1 claude "工作進度保存模式：請先執行 git status 查看本次有哪些檔案異動，再閱讀現有的 context.md 了解上次進度，然後詢問我本次完成了什麼、有什麼待續事項，最後更新對應的 context.md，並視情況更新 workingData 的長期文件。"
+}
+```
+
+#### 【AI 執行】Windows — 加入 PowerShell Profile（已在 Windows 實測驗證）
+
+```powershell
+function cs {
+    Set-Location 'D:\Meow-Env\Meow-agent'
+    $env:CLAUDE_CODE_NO_FLICKER = '1'
+    claude "工作進度保存模式：請先執行 git status 查看本次有哪些檔案異動，再閱讀現有的 context.md 了解上次進度，然後詢問我本次完成了什麼、有什麼待續事項，最後更新對應的 context.md，並視情況更新 workingData 的長期文件。"
+}
+```
 
 ---
 
