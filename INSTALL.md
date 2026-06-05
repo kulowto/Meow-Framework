@@ -345,56 +345,119 @@ Meow-Env 使用兩種不同機制安裝工具，**兩者不互通**：
 
 ---
 
-### 6.2 Marketplace Plugins（每台機器獨立安裝）
+### 6.2 Marketplace Plugins（每台機器手動安裝）
 
-以下三個 Plugin 是透過 Marketplace 安裝的，**不會隨 Git 同步**，換機後必須重新安裝。
+以下三個 Plugin **不會隨 Git 同步**，換機後必須重新安裝。
 
-#### Step 1 — 【AI 執行】將 Marketplace 來源加入 `~/.claude/settings.json`
-
-在 `settings.json` 的最外層加入以下內容（若已有 `extraKnownMarketplaces` 區塊則合併進去）：
-
-```json
-"extraKnownMarketplaces": {
-  "anthropic-agent-skills": {
-    "source": {
-      "source": "git",
-      "url": "https://github.com/anthropics/skills.git"
-    }
-  },
-  "ui-ux-pro-max-skill": {
-    "source": {
-      "source": "git",
-      "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git"
-    }
-  },
-  "karpathy-skills": {
-    "source": {
-      "source": "git",
-      "url": "https://github.com/forrestchang/andrej-karpathy-skills.git"
-    }
-  }
-}
-```
-
-#### Step 2 — 【人工操作】在 Claude Code 內執行安裝指令
-
-重新啟動 Claude Code 後，依序輸入以下三個安裝指令：
-
-```
-/install-plugin skill-creator@claude-plugins-official
-/install-plugin ui-ux-pro-max@ui-ux-pro-max-skill
-/install-plugin andrej-karpathy-skills@karpathy-skills
-```
-
-安裝完成後，`~/.claude/plugins/installed_plugins.json` 應列出三個 plugin。
+> **注意**：`/install-plugin` 指令在部分版本的 Claude Code 無效。  
+> 正確方式是**手動 clone 到固定路徑，再寫入 `installed_plugins.json`**。
 
 #### 已安裝 Plugin 清單
 
-| Plugin 名稱 | Marketplace | 用途 |
-|-------------|------------|------|
-| `skill-creator` | `claude-plugins-official` | 自製 Skill 的完整流程工具 |
-| `ui-ux-pro-max` | `ui-ux-pro-max-skill` | 配色、字體、設計系統參考 |
-| `andrej-karpathy-skills` | `karpathy-skills` | Karpathy 程式碼原則（自動套用）|
+| Plugin 名稱 | Marketplace | Repo | 用途 |
+|-------------|------------|------|------|
+| `skill-creator` | `claude-plugins-official` | Anthropics 官方 | 自製 Skill 的完整流程工具 |
+| `ui-ux-pro-max` | `ui-ux-pro-max-skill` | nextlevelbuilder/ui-ux-pro-max-skill | 配色、字體、設計系統參考 |
+| `andrej-karpathy-skills` | `karpathy-skills` | forrestchang/andrej-karpathy-skills | Karpathy 程式碼原則（自動套用）|
+
+---
+
+#### Step 1 — 【AI 執行】Mac：手動 clone Plugin 到 cache 目錄
+
+```bash
+# ui-ux-pro-max（版本 2.5.0，鎖定 commit）
+mkdir -p ~/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max
+git clone https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git \
+  ~/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0
+cd ~/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0
+git checkout b7e3af80f6e331f6fb456667b82b12cade7c9d35
+
+# andrej-karpathy-skills（版本 1.0.0，鎖定 commit）
+mkdir -p ~/.claude/plugins/cache/karpathy-skills/andrej-karpathy-skills
+git clone https://github.com/forrestchang/andrej-karpathy-skills.git \
+  ~/.claude/plugins/cache/karpathy-skills/andrej-karpathy-skills/1.0.0
+cd ~/.claude/plugins/cache/karpathy-skills/andrej-karpathy-skills/1.0.0
+git checkout 2c606141936f1eeef17fa3043a72095b4765b9c2
+```
+
+#### Step 1 — 【AI 執行】Windows（PowerShell）：手動 clone Plugin 到 cache 目錄
+
+```powershell
+# ui-ux-pro-max
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\plugins\cache\ui-ux-pro-max-skill\ui-ux-pro-max"
+git clone https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git `
+  "$env:USERPROFILE\.claude\plugins\cache\ui-ux-pro-max-skill\ui-ux-pro-max\2.5.0"
+cd "$env:USERPROFILE\.claude\plugins\cache\ui-ux-pro-max-skill\ui-ux-pro-max\2.5.0"
+git checkout b7e3af80f6e331f6fb456667b82b12cade7c9d35
+
+# andrej-karpathy-skills
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\plugins\cache\karpathy-skills\andrej-karpathy-skills"
+git clone https://github.com/forrestchang/andrej-karpathy-skills.git `
+  "$env:USERPROFILE\.claude\plugins\cache\karpathy-skills\andrej-karpathy-skills\1.0.0"
+cd "$env:USERPROFILE\.claude\plugins\cache\karpathy-skills\andrej-karpathy-skills\1.0.0"
+git checkout 2c606141936f1eeef17fa3043a72095b4765b9c2
+```
+
+#### Step 2 — 【AI 執行】寫入 `installed_plugins.json`
+
+> `installPath` 必須使用**絕對路徑**（不可用 `~`）。  
+> Mac 執行 `echo $HOME` 取得實際路徑後填入。
+
+**Mac** — 寫入 `~/.claude/plugins/installed_plugins.json`：
+
+```bash
+HOME_PATH=$(echo $HOME)
+cat > ~/.claude/plugins/installed_plugins.json << EOF
+{
+  "version": 2,
+  "plugins": {
+    "ui-ux-pro-max@ui-ux-pro-max-skill": [
+      {
+        "scope": "user",
+        "installPath": "${HOME_PATH}/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0",
+        "version": "2.5.0",
+        "installedAt": "2026-04-18T13:53:54.034Z",
+        "lastUpdated": "2026-04-18T13:53:54.034Z",
+        "gitCommitSha": "b7e3af80f6e331f6fb456667b82b12cade7c9d35"
+      }
+    ],
+    "andrej-karpathy-skills@karpathy-skills": [
+      {
+        "scope": "user",
+        "installPath": "${HOME_PATH}/.claude/plugins/cache/karpathy-skills/andrej-karpathy-skills/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-05-02T09:05:29.034Z",
+        "lastUpdated": "2026-05-02T09:05:29.034Z",
+        "gitCommitSha": "2c606141936f1eeef17fa3043a72095b4765b9c2"
+      }
+    ]
+  }
+}
+EOF
+```
+
+#### Step 3 — 【AI 執行】更新 `settings.json` 加入 Marketplace 來源與啟用清單
+
+確認 `~/.claude/settings.json` 包含以下兩個區塊（若已有則合併，不可重複）：
+
+```json
+"extraKnownMarketplaces": {
+  "ui-ux-pro-max-skill": {
+    "source": { "source": "git", "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git" }
+  },
+  "karpathy-skills": {
+    "source": { "source": "git", "url": "https://github.com/forrestchang/andrej-karpathy-skills.git" }
+  }
+},
+"enabledPlugins": {
+  "ui-ux-pro-max@ui-ux-pro-max-skill": true,
+  "andrej-karpathy-skills@karpathy-skills": true
+}
+```
+
+#### Step 4 — 【人工操作】重新啟動 Claude Code
+
+完整重啟後，`/ui-ux-pro-max` 與 `/karpathy-guidelines` 指令應可正常觸發。
 
 ---
 
@@ -582,9 +645,10 @@ Step 6 的存檔路徑改為 `D:\Meow-Env\Meow-Dev\active\inquiry_sessions\`，
 - [ ] Claude Code 內輸入 `Ctrl+G` 可開啟外部編輯器
 
 **Plugins**
-- [ ] `~/.claude/plugins/installed_plugins.json` 列出三個 plugin：`skill-creator`、`ui-ux-pro-max`、`andrej-karpathy-skills`
-- [ ] Claude Code 內輸入 `/skill-creator` 可觸發 Skill 創建模式
-- [ ] Claude Code 內輸入 `/karpathy-guidelines` 可觸發 Karpathy 原則模式
+- [ ] `~/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0/` 目錄存在且含 `CLAUDE.md`
+- [ ] `~/.claude/plugins/cache/karpathy-skills/andrej-karpathy-skills/1.0.0/` 目錄存在且含 `CLAUDE.md`
+- [ ] `~/.claude/plugins/installed_plugins.json` 列出 `ui-ux-pro-max` 與 `andrej-karpathy-skills`（含 installPath 與 gitCommitSha）
+- [ ] Claude Code 重啟後，`/ui-ux-pro-max` 與 `/karpathy-guidelines` 可正常觸發
 
 **全域指令**
 - [ ] `~/.claude/commands/inquiry.md` 存在
