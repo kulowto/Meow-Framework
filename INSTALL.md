@@ -108,52 +108,35 @@ Meow-Env/
 
 ---
 
-### 【AI 執行】Mac — 首次安裝（Clone）
+### 【AI 執行】Mac — Clone / 更新（自動判斷）
+
+> 實測指令（2026-06-05，Mac）：以下腳本在 Meow-Framework 已存在、其餘四個 repo 尚未 clone 的混合狀態下驗證通過。
 
 ```bash
 cd ~/Meow-Env
-
-git clone https://github.com/kulowto/Meow-Framework.git
-git clone https://github.com/kulowto/Meow-agent.git
-git clone https://github.com/kulowto/Meow-Wiki.git
-git clone https://github.com/kulowto/Meow-tools.git
-git clone https://github.com/kulowto/Meow-dev.git
-```
-
----
-
-### 【AI 執行】Mac — 已有 repo 時更新（Pull）
-
-```bash
-cd ~/Meow-Env
-for dir in Meow-Framework Meow-agent Meow-Wiki Meow-tools Meow-dev; do
-  echo "=== $dir ===" && git -C "$dir" pull
+for repo in Meow-Framework Meow-agent Meow-Wiki Meow-tools Meow-dev; do
+  echo "=== $repo ==="
+  if [ -d "$repo" ]; then
+    git -C "$repo" pull
+  else
+    git clone "https://github.com/kulowto/$repo.git"
+  fi
 done
 ```
 
 ---
 
-### 【AI 執行】Windows — 首次安裝（Clone，PowerShell）
+### 【AI 執行】Windows — Clone / 更新（自動判斷，PowerShell）
 
 ```powershell
 cd D:\Meow-Env
-
-git clone https://github.com/kulowto/Meow-Framework.git
-git clone https://github.com/kulowto/Meow-agent.git
-git clone https://github.com/kulowto/Meow-Wiki.git
-git clone https://github.com/kulowto/Meow-tools.git
-git clone https://github.com/kulowto/Meow-dev.git
-```
-
----
-
-### 【AI 執行】Windows — 已有 repo 時更新（Pull，PowerShell）
-
-```powershell
-cd D:\Meow-Env
-foreach ($dir in @("Meow-Framework","Meow-agent","Meow-Wiki","Meow-tools","Meow-dev")) {
-  Write-Host "=== $dir ===" -ForegroundColor Cyan
-  git -C $dir pull
+foreach ($repo in @("Meow-Framework","Meow-agent","Meow-Wiki","Meow-tools","Meow-dev")) {
+  Write-Host "=== $repo ===" -ForegroundColor Cyan
+  if (Test-Path $repo) {
+    git -C $repo pull
+  } else {
+    git clone "https://github.com/kulowto/$repo.git"
+  }
 }
 ```
 
@@ -322,6 +305,7 @@ function cc {
 - [ ] `~/.claude/settings.local.json` 已建立（即使是空框架）
 - [ ] 輸入 `cc` 可成功啟動 Claude Code 並切入 Meow-agent 目錄
 - [ ] Claude Code 內輸入 `Ctrl+G` 可開啟外部編輯器
+- [ ] （Mac）執行 `trash --version` 確認 trash-cli 已全域安裝；若無，執行 `npm install -g trash-cli`
 
 ---
 
