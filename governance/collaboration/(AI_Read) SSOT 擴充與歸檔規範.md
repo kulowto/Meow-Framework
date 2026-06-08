@@ -28,6 +28,9 @@ Meow-Agent/ssot/
   content-profiles/           ← 受眾定義（按需載入，不全部引用）
     _index.md                     Profile 清單與使用說明
     {profile-name}.md             各受眾定義文件
+  build/                      ← SSOT 建置系統（Windows Only）
+    build.py                      從 SSOT 生成各 AI 工具的設定文件
+    targets.json                  同步目標路徑清單（Windows 專屬路徑）
   archive/                    ← 退役內容歸檔區
     _README.md                    歸檔區說明
     content-profiles/             退役 Profile
@@ -57,7 +60,8 @@ Meow-Agent/ssot/
 | Codex | `python ssot/build/build.py`（手動生成 `AGENTS.md`） | 不支援 @include，需執行 build script |
 | 其他 AI | 新增對應 template，執行 build | 擴充 build script 的 templates 目錄 |
 
-> **Build script 位置**：`MA/ssot/build/build.py`（待建立，AGENTS.md 需求確認後再實作）
+> **Build script 位置**：`MA/ssot/build/build.py`
+> **同步目標**：`MA/ssot/build/targets.json`（Windows 路徑清單，新增目標在此維護）
 
 ---
 
@@ -115,6 +119,33 @@ description: 一行說明適用情境
 4. Commit 訊息格式：`docs(ssot): 更新 {section-name} - 簡述改了什麼`
 
 **重要**：修改 SSOT 文件後，Claude Code 下次啟動即生效（via @include）。Codex 需要手動 build。
+
+---
+
+## 四之一、SSOT 更新後的多 AI 同步規則（強制）
+
+**每次修改任何 SSOT core/ 文件後，必須執行 build script 同步 Codex 目標：**
+
+```
+python D:\Meow-Env\Meow-agent\ssot\build\build.py
+```
+
+**同步目標清單**（Windows Only，記錄於 `ssot/build/targets.json`）：
+
+| 路徑 | 用途 |
+|------|------|
+| `D:\codex_proj\AGENTS.md` | 通用 Codex 開發工作區 |
+| `D:\ggst_dismantleproj\AGENTS.md` | GGST 拆解分析專案 |
+
+**新增同步目標時**：
+1. 在 `targets.json` 補一個 entry（含 `name`、`path`、`enabled`、`project_context`、`note`）
+2. 在上方表格補一行
+3. 執行一次 build 確認正常生成
+
+**停用同步目標時**（目錄刪除或不再維護）：
+1. 在 `targets.json` 將對應 entry 的 `"enabled"` 改為 `false`
+2. 在上方表格標記 `已停用`
+3. 不需要刪除 entry，保留歷史紀錄
 
 ---
 
@@ -182,7 +213,7 @@ archived_to: archive/{path}/filename.md
 
 ```
 □ frontmatter version 已更新
-□ 若影響 Codex → 已執行 build script
+□ 已執行 build script（python D:\Meow-Env\Meow-agent\ssot\build\build.py）
 □ Commit 訊息有 docs(ssot): 前綴
 ```
 
